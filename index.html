@@ -1,0 +1,1406 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Time Block (Capsule)</title>
+    <link rel="shortcut icon" href="images/fav.png" type="image/png">
+    <style>
+        /* Share and Download buttons */
+.letter-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--accent);
+}
+
+.letter-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.twitter-share-btn, .download-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--primary);
+    color: var(--secondary);
+    border: none;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.twitter-share-btn:hover, .download-btn:hover {
+    opacity: 0.9;
+}
+
+/* Capsule opening animation */
+@keyframes capsuleOpen {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.capsule-opening {
+    animation: capsuleOpen 0.5s ease;
+}
+        .capsule {
+    transition: all 0.5s ease;
+    perspective: 1000px;
+}
+
+.capsule-top {
+    transform-origin: bottom center;
+    transition: transform 0.5s ease;
+}
+
+.capsule-opening {
+    transform: scale(1.05);
+}
+
+.capsule-opened .capsule-top {
+    transform: translateY(-80%) rotateX(180deg);
+}
+
+.capsule-body {
+    transition: all 0.5s ease;
+}
+
+
+        :root {
+            --primary: #000;
+            --secondary: #fff;
+            --accent: #555;
+            --paper: #f8f4e8;
+            --highlight: #ff4136;
+            --capsule-top: #333;
+            --capsule-bottom: #666;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--secondary);
+            color: var(--primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            flex: 1;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--primary);
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .social-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .social-links a::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .social-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Main Content */
+        .description {
+            text-align: center;
+            max-width: 600px;
+            margin: 3rem auto;
+            font-size: 1.1rem;
+        }
+        
+        .cta-button {
+            display: block;
+            width: 200px;
+            margin: 2rem auto;
+            padding: 1rem;
+            text-align: center;
+            background-color: var(--primary);
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: bold;
+            border: 2px solid var(--primary);
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            background-color: var(--secondary);
+            color: var(--primary);
+        }
+        
+        /* Fixed Buttons */
+        .fixed-button {
+            position: fixed;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        
+        .view-capsules {
+            bottom: 2rem;
+            right: 2rem;
+        }
+        
+        .create-capsule {
+            bottom: 2rem;
+            left: 2rem;
+            display: none;
+        }
+        
+        .fixed-button:hover {
+            background-color: var(--secondary);
+            color: var(--primary);
+            outline: 2px solid var(--primary);
+        }
+        
+        /* Form Page */
+        .form-page {
+            display: none;
+            padding: 2rem 0;
+        }
+        
+        .form-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+        
+        .capsule-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--primary);
+            background-color: var(--secondary);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background-color: var(--primary);
+            color: var(--secondary);
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--secondary);
+            color: var(--primary);
+            outline: 2px solid var(--primary);
+        }
+        
+        /* Capsules Page */
+        .capsules-page {
+            display: none;
+            padding: 2rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 100px;
+            height: 2px;
+            background-color: var(--primary);
+            margin: 0.5rem auto;
+        }
+        
+        .capsules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 3rem;
+            justify-items: center;
+            margin-bottom: 4rem;
+        }
+        
+        /* Capsule Design */
+        .capsule {
+            width: 200px;
+            height: 300px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .capsule:hover {
+            transform: translateY(-5px);
+        }
+        
+        .capsule-body {
+            position: absolute;
+            width: 100%;
+            height: 220px;
+            bottom: 0;
+            background: linear-gradient(to bottom, var(--capsule-bottom), #888);
+            border-radius: 100px 100px 0 0;
+            border: 3px solid var(--primary);
+            border-bottom: none;
+            overflow: hidden;
+            transform: rotate(180deg);
+        }
+        
+        .capsule-top {
+            position: absolute;
+            width: 100%;
+            height: 80px;
+            top: 0;
+            background: linear-gradient(to bottom, var(--capsule-top), #444);
+            border-radius: 100px 100px 0 0;
+            border: 3px solid var(--primary);
+            border-bottom: none;
+            z-index: 2;
+            transition: transform 0.5s;
+        }
+        
+        .capsule-top::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .capsule-content {
+            position: absolute;
+            width: 100%;
+            height: 220px;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            box-sizing: border-box;
+            z-index: 1;
+            color: white;
+            text-align: center;
+            transform: rotate(180deg);
+        }
+        
+        .capsule-preview {
+            filter: blur(5px);
+            user-select: none;
+            transition: filter 0.3s;
+        }
+        
+        .capsule:hover .capsule-preview {
+            filter: blur(3px);
+        }
+        
+        .capsule-number {
+            position: absolute;
+            top: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: var(--secondary);
+            width: auto;
+            min-width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 3;
+            border-radius: 50%;
+            border: 2px solid var(--secondary);
+            padding: 0 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* Countdown Timer */
+        .countdown-timer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+            width: 100%;
+            padding: 0 1rem;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+        
+        /* Featured Capsule */
+        .featured-capsule {
+            width: 250px;
+            height: 375px;
+        }
+        
+        .featured-capsule .capsule-body {
+            height: 275px;
+        }
+        
+        .featured-capsule .capsule-top {
+            height: 100px;
+        }
+        
+        .featured-capsule .capsule-number {
+            width: auto;
+            height: 4rem;
+            font-size: 1rem;
+            padding: 0 1rem;
+        }
+        
+        /* Share Button */
+        .share-btn {
+            position: absolute;
+            bottom: 11rem;
+            right: 1rem;
+            background-color: var(--secondary);
+            color: var(--primary);
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 3;
+            transform: rotate(180deg);
+        }
+        
+        .share-btn:hover {
+            background-color: var(--highlight);
+            color: var(--secondary);
+            transform: rotate(180deg) scale(1.1);
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 2px solid var(--primary);
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Letter Modal */
+        .letter-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .letter-container {
+            background-color: var(--paper);
+            width: 90%;
+            max-width: 600px;
+            padding: 2rem;
+            position: relative;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .letter-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .letter-header::after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 1px;
+            background-color: var(--primary);
+            margin-top: 1rem;
+            opacity: 0.3;
+        }
+        
+        .letter-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            white-space: pre-wrap;
+        }
+        
+        .letter-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+        
+        .close-letter {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        
+        .letter-seal {
+            position: absolute;
+            top: -1.5rem;
+            right: -1.5rem;
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--primary);
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            transform: rotate(15deg);
+        }
+        
+        /* Share Modal */
+        .share-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .share-container {
+            background-color: var(--paper);
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            position: relative;
+            border: 1px solid var(--primary);
+        }
+        
+        .share-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .share-url {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--primary);
+            background-color: var(--secondary);
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1.5rem;
+        }
+        
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .share-button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: var(--secondary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .share-button:hover {
+            opacity: 0.8;
+        }
+        
+        .close-share {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        
+        /* Risk elements */
+        .risk-element {
+            position: fixed;
+            font-size: 1.5rem;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        /* Animation for opened capsule */
+        @keyframes openCapsule {
+            0% { transform: translateY(0) rotate(0); }
+            100% { transform: translateY(-120px) rotate(-10deg); }
+        }
+        
+        @keyframes closeCapsule {
+            0% { transform: translateY(-120px) rotate(-10deg); }
+            100% { transform: translateY(0) rotate(0); }
+        }
+        
+        .capsule-opened .capsule-top {
+            transform: translateY(-220px) rotate(-10deg);
+            animation: openCapsule 0.5s forwards;
+        }
+        
+        .capsule-closed .capsule-top {
+            animation: closeCapsule 0.5s forwards;
+        }
+        
+        .capsule-opened .countdown-timer,
+        .capsule-opened .capsule-preview {
+            display: none;
+        }
+        
+        /* My Capsules Section */
+        .my-capsules {
+            margin-bottom: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .capsules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .fixed-button {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .letter-container {
+                padding: 1.5rem;
+            }
+            
+            .capsule {
+                width: 180px;
+                height: 270px;
+            }
+            
+            .capsule-body {
+                height: 200px;
+            }
+            
+            .capsule-top {
+                height: 70px;
+            }
+            
+            .featured-capsule {
+                width: 220px;
+                height: 330px;
+            }
+            
+            .featured-capsule .capsule-body {
+                height: 250px;
+            }
+            
+            .featured-capsule .capsule-top {
+                height: 80px;
+            }
+        }
+        .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 1001;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--paper);
+    padding: 2rem;
+    border-radius: 5px;
+    max-width: 80%;
+    text-align: center;
+    border: 2px solid var(--primary);
+}
+
+.modal-close {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary);
+    color: var(--secondary);
+    border: none;
+    cursor: pointer;
+}
+    </style>
+</head>
+<body>
+    <!-- Risk elements -->
+    <div class="risk-element" style="top: 20%; left: 10%;">⚠️</div>
+    <div class="risk-element" style="top: 70%; right: 15%;">☠️</div>
+    <div class="risk-element" style="bottom: 10%; left: 20%;">💀</div>
+    <div class="risk-element" style="top: 30%; right: 25%;">☢️</div>
+    
+    <div class="container">
+        <!-- Main Page -->
+        <header>
+            <div class="logo">The Time Block</div>
+            <div class="social-links">
+                <a href="https://t.me/TheTimeBlock" target="_blank">Telegram</a>
+                <a href="https://x.com/TheTimeBlock" target="_blank">Twitter</a>
+            </div>
+        </header>
+        
+        <main>
+            <div class="description">
+                <p>Seal your thoughts in a digital time capsule. Write a message to your future self, set a delivery date, and forget about it until it arrives in your inbox.</p>
+                <p>All capsules are numbered and shareable. What will you tell your future self?</p>
+            </div>
+            
+            <a href="#" class="cta-button" id="main-cta">Create Capsule</a>
+        </main>
+        
+        <!-- Form Page -->
+        <div class="form-page" id="form-page">
+            <h2 class="form-title">Create Time Capsule</h2>
+            <form class="capsule-form" id="capsule-form">
+                <div class="form-group">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" required="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="delivery-date">Delivery Date</label>
+                    <input type="date" id="delivery-date" required="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" required=""></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Seal Capsule</button>
+            </form>
+        </div>
+        
+        <!-- Capsules Page -->
+        <div class="capsules-page" id="capsules-page">
+           <!-- В разделе capsules-page -->
+<div class="my-capsules" id="my-capsules">
+    <h2 class="section-title">My timeblocks</h2>
+    <div class="capsules-grid" id="my-capsules-grid">
+        <!-- Мои капсулы будут здесь -->
+    </div>
+</div>
+
+<div class="all-capsules">
+    <h2 class="section-title">User timeblocks</h2>
+    <div class="capsules-grid" id="all-capsules-grid">
+        <!-- Все капсулы будут здесь -->
+    </div>
+</div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        The Time Block, 2025
+    </footer>
+    
+    <!-- Letter Modal -->
+    <div class="letter-modal" id="letter-modal">
+        <div class="letter-container">
+            <button class="close-letter" id="close-letter">✕</button>
+            <div class="letter-seal" id="letter-seal">#1</div>
+            <div class="letter-header">
+                <h3>SECRET TIME CAPSULE</h3>
+                <p>Opened on: <span id="opened-date"></span></p>
+            </div>
+            <div class="letter-content" id="letter-content">
+                <!-- Message will appear here -->
+            </div>
+            <div class="letter-footer">
+                <div>Created: <span id="created-date"></span></div>
+                <div>Delivery: <span id="delivery-date-modal"></span></div>
+                <div class="letter-buttons">
+                    <div>
+                        <button class="download-btn" id="download-letter">Download as Image</button>
+                    </div>
+                    <div>
+                        <button class="twitter-share-btn" id="twitter-share-btn">Share on X</button>
+                    </div>
+                </div>
+               
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Share Modal -->
+    <div class="share-modal" id="share-modal">
+        <div class="share-container">
+            <button class="close-share" id="close-share">✕</button>
+            <h3 class="share-title">Share This Capsule</h3>
+            <input type="text" class="share-url" id="share-url" readonly="">
+            <div class="share-buttons">
+                <button class="share-button" id="copy-share">Copy</button>
+                <button class="share-button" id="twitter-share">Twitter</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fixed Buttons -->
+    <a href="#" class="fixed-button view-capsules" id="view-capsules-btn">All Capsules</a>
+    <a href="#" class="fixed-button create-capsule" id="create-capsule-btn">Create Capsule</a>
+    
+    <!-- Letter Modal -->
+<div class="letter-modal" id="letter-modal">
+    <div class="letter-container">
+        <button class="close-letter" id="close-letter">✕</button>
+        <div class="letter-seal" id="letter-seal">#1</div>
+        <div class="letter-header">
+            <h3>SECRET TIME CAPSULE</h3>
+            <p>Opened on: <span id="opened-date"></span></p>
+        </div>
+        <div class="letter-content" id="letter-content">
+            <!-- Message will appear here -->
+        </div>
+        <div class="letter-footer">
+            <div>Created: <span id="created-date"></span></div>
+            <div>Delivery: <span id="delivery-date-modal"></span></div>
+           
+        </div>
+    </div>
+</div>
+
+<!-- Alert Modal -->
+<div class="modal" id="alert-modal">
+    <div class="modal-content">
+        <div class="modal-body" id="alert-message"></div>
+        <button class="modal-close" id="alert-close">OK</button>
+    </div>
+</div>
+<script src="js/html2canvas.min.js"></script>
+    <script>
+        // Download as image
+document.getElementById('download-letter').addEventListener('click', async () => {
+    const letterContainer = document.querySelector('.letter-container');
+    
+    try {
+        const canvas = await html2canvas(letterContainer, {
+            backgroundColor: '#f8f4e8',
+            scale: 2,
+            logging: false
+        });
+        
+        const link = document.createElement('a');
+        link.download = `time-capsule-${document.getElementById('letter-seal').textContent}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (error) {
+        console.error('Error generating image:', error);
+        showAlert('Failed to generate image');
+    }
+});
+
+        // Twitter share
+document.getElementById('twitter-share-btn').addEventListener('click', () => {
+    const capsuleId = document.getElementById('letter-seal').textContent;
+    const text = `Check out my time capsule #${capsuleId} on The Time Block`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&hashtags=TimeCapsule`;
+    window.open(url, '_blank');
+});
+        async function openCapsule(id) {
+    const capsuleElement = document.querySelector(`.capsule[data-id="${id}"]`);
+    if (!capsuleElement) return;
+
+    // Start opening animation
+    capsuleElement.classList.add('capsule-opening');
+    
+    try {
+        const userId = getOrCreateUserId();
+        const response = await fetch(`api.php?action=open_capsule&id=${id}&user_id=${userId}`);
+        const result = await response.json();
+       
+        if (result.success) {
+            const capsule = result.data;
+            const deliveryDate = new Date(capsule.delivery_date);
+            const now = new Date();
+            
+            // Complete opening animation
+            setTimeout(() => {
+                capsuleElement.classList.remove('capsule-opening');
+              
+                    capsuleElement.classList.add('capsule-opened');
+                    showCapsuleContent(capsule);
+               
+            }, 500);
+        } else {
+            console.log(123);
+            showAlert(result.message);
+            capsuleElement.classList.remove('capsule-opening');
+        }
+    } catch (error) {
+        console.error('Error opening capsule:', error);
+        showAlert('Failed to open capsule');
+        capsuleElement.classList.remove('capsule-opening');
+    }
+}
+        // Alert functions
+function showAlert(message) {
+ 
+    const alertModal = document.getElementById('alert-modal');
+    document.getElementById('alert-message').textContent = message;
+    alertModal.style.display = 'flex';
+}
+
+document.getElementById('alert-close').addEventListener('click', () => {
+    document.getElementById('alert-modal').style.display = 'none';
+});
+
+        // Sample database (in a real app, this would be server-side)
+        let capsulesDB = [
+            { id: 1, email: "user1@example.com", message: "Hope you achieved your goals!\n\nRemember that project you were working on? Did you finish it? I hope you're proud of what you've accomplished.", deliveryDate: "2025-12-31", createdAt: "2025-01-01", opened: false, isMine: false },
+            { id: 2, email: "user2@example.com", message: "Did you finally learn to play guitar?\n\nIf not, what are you waiting for? Life is too short to keep postponing your dreams.", deliveryDate: "2026-06-15", createdAt: "2025-02-15", opened: false, isMine: false },
+            { id: 3, email: "user3@example.com", message: "Remember to appreciate the little things.\n\nThe smell of coffee in the morning, the warmth of sunlight, the laughter of friends. These moments are your real treasures.", deliveryDate: "2025-09-01", createdAt: "2025-03-10", opened: false, isMine: false }
+        ];
+        
+        // Track the last created capsule ID
+        let lastCreatedCapsuleId = null;
+        const currentUserEmail = "myemail@example.com"; // In a real app, this would be from login
+        
+        // Generate random capsule ID in format N_R2TK5_#3
+        function generateCapsuleId(sequenceNumber) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomPart = '';
+            for (let i = 0; i < 5; i++) {
+                randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return `N_${randomPart}_#${sequenceNumber}`;
+        }
+        
+        const API_BASE_URL = 'api.php';
+
+        // DOM Elements
+        const mainPage = document.querySelector('main');
+        const formPage = document.getElementById('form-page');
+        const capsulesPage = document.getElementById('capsules-page');
+        const myCapsulesGrid = document.getElementById('my-capsules-grid');
+        const allCapsulesGrid = document.getElementById('all-capsules-grid');
+        const mainCta = document.getElementById('main-cta');
+        const viewCapsulesBtn = document.getElementById('view-capsules-btn');
+        const createCapsuleBtn = document.getElementById('create-capsule-btn');
+        const capsuleForm = document.getElementById('capsule-form');
+        const deliveryDateInput = document.getElementById('delivery-date');
+        const letterModal = document.getElementById('letter-modal');
+        const closeLetter = document.getElementById('close-letter');
+        const letterContent = document.getElementById('letter-content');
+        const letterSeal = document.getElementById('letter-seal');
+        const createdDate = document.getElementById('created-date');
+        const deliveryDateModal = document.getElementById('delivery-date-modal');
+        const openedDate = document.getElementById('opened-date');
+        const shareModal = document.getElementById('share-modal');
+        const closeShare = document.getElementById('close-share');
+        const shareUrl = document.getElementById('share-url');
+        const copyShareBtn = document.getElementById('copy-share');
+        const twitterShareBtn = document.getElementById('twitter-share');
+        const myCapsulesSection = document.getElementById('my-capsules');
+        
+        // Set minimum date for delivery (today + 1 day)
+        function setMinDeliveryDate() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const minDate = tomorrow.toISOString().split('T')[0];
+            deliveryDateInput.setAttribute('min', minDate);
+        }
+        
+        // Navigation
+        function showMainPage() {
+            mainPage.style.display = 'block';
+            formPage.style.display = 'none';
+            capsulesPage.style.display = 'none';
+            createCapsuleBtn.style.display = 'none';
+            viewCapsulesBtn.style.display = 'block';
+        }
+        
+        function showFormPage() {
+            mainPage.style.display = 'none';
+            formPage.style.display = 'block';
+            capsulesPage.style.display = 'none';
+            createCapsuleBtn.style.display = 'none';
+            viewCapsulesBtn.style.display = 'block';
+            setMinDeliveryDate();
+        }
+        
+        function showCapsulesPage() {
+            mainPage.style.display = 'none';
+            formPage.style.display = 'none';
+            capsulesPage.style.display = 'block';
+            createCapsuleBtn.style.display = 'block';
+            viewCapsulesBtn.style.display = 'none';
+            loadCapsules();
+        }
+        
+        // Calculate time remaining
+        function getTimeRemaining(endDate) {
+            const total = Date.parse(endDate) - Date.parse(new Date());
+            const seconds = Math.floor((total / 1000) % 60);
+            const minutes = Math.floor((total / 1000 / 60) % 60);
+            const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+            const days = Math.floor(total / (1000 * 60 * 60 * 24));
+            
+            return {
+                total,
+                days,
+                hours,
+                minutes,
+                seconds
+            };
+        }
+        
+        // Format time remaining
+        function formatTimeRemaining(endDate) {
+            const t = getTimeRemaining(endDate);
+            
+            if (t.total <= 0) {
+                return 'Ready to open!';
+            }
+            
+            if (t.days > 0) {
+                return `${t.days}d ${t.hours}h`;
+            } else if (t.hours > 0) {
+                return `${t.hours}h ${t.minutes}m`;
+            } else {
+                return `${t.minutes}m ${t.seconds}s`;
+            }
+        }
+        
+        // Load capsules from "database"
+        // Функция для загрузки капсул
+        async function loadCapsules() {
+    try {
+        const userId = getOrCreateUserId();
+        const response = await fetch(`api.php?action=get_capsules&user_id=${userId}`);
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            renderCapsules(result.data, userId);
+        } else {
+            console.error('Error loading capsules:', result.message);
+        }
+    } catch (error) {
+        console.error('Error loading capsules:', error);
+    }
+}
+
+function renderCapsules(capsules, userId) {
+    const myGrid = document.getElementById('my-capsules-grid');
+    const allGrid = document.getElementById('all-capsules-grid');
+    
+    myGrid.innerHTML = '';
+    allGrid.innerHTML = '';
+    
+    if (!capsules || capsules.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.textContent = 'No capsules found';
+        allGrid.appendChild(emptyMsg);
+        return;
+    }
+    
+    capsules.forEach(capsule => {
+        const isMine = capsule.user_id === userId;
+        const gridToUse = isMine ? myGrid : allGrid;
+        const canOpen = canOpenCapsule(capsule.delivery_date);
+        
+        const capsuleEl = document.createElement('div');
+        capsuleEl.className = `capsule ${capsule.opened ? 'capsule-opened' : ''}`;
+        capsuleEl.dataset.id = capsule.id;
+        
+        capsuleEl.innerHTML = `
+            <div class="capsule-number">#${capsule.id.split('_')[2]}</div>
+            <div class="capsule-body">
+                <div class="capsule-content">
+                    ${!capsule.opened ? `
+                        <div class="capsule-preview">${capsule.message.substring(0, 50)}...</div>
+                        <div class="countdown-timer" id="timer-${capsule.id}">
+                            ${formatTimeRemaining(capsule.delivery_date)}
+                        </div>
+                    ` : `
+                        <div class="full-message">${capsule.message}</div>
+                    `}
+                </div>
+            </div>
+            <div class="capsule-top"></div>
+        `;
+        
+        capsuleEl.addEventListener('click', () => {
+            if (isMine) {
+                openCapsule(capsule.id);
+            } else {
+           
+            }
+        });
+        
+        gridToUse.appendChild(capsuleEl);
+    });
+}
+
+// Вызываем при загрузке страницы
+    
+        // Create a capsule element
+        async function createCapsule(capsuleData) {
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=create_capsule&data=${encodeURIComponent(JSON.stringify(capsuleData))}`
+                });
+                
+                return await response.json();
+            } catch (error) {
+                console.error("Error creating capsule:", error);
+                throw error;
+            }
+        }
+
+        
+        // Update all timers
+        function updateAllTimers() {
+            capsulesDB.forEach(capsule => {
+                const timerElement = document.getElementById(`timer-${capsule.id}`);
+                if (timerElement && !capsule.opened) {
+                    timerElement.textContent = formatTimeRemaining(capsule.deliveryDate);
+                }
+            });
+        }
+
+        function showCapsuleContent(capsule) {
+    letterContent.textContent = capsule.message;
+    letterSeal.textContent = `#${capsule.id.split('_')[2]}`;
+    createdDate.textContent = new Date(capsule.created_at).toLocaleDateString();
+    deliveryDateModal.textContent = new Date(capsule.delivery_date).toLocaleDateString();
+    openedDate.textContent = new Date().toLocaleDateString();
+    
+    letterModal.style.display = 'flex';
+}
+
+// Функция закрытия капсулы
+function closeCapsule() {
+    letterModal.style.display = 'none';
+}
+
+function setupCapsuleClickHandlers() {
+    document.addEventListener('click', function(e) {
+        const capsuleElement = e.target.closest('.capsule');
+        if (capsuleElement) {
+            const capsuleId = capsuleElement.dataset.id;
+            openCapsule(capsuleId);
+        }
+    });
+}
+        
+        // Open capsule
+    
+
+function canOpenCapsule(deliveryDate) {
+    const now = new Date();
+    return new Date(deliveryDate) <= now;
+}
+
+        // Функции для работы с куки
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function setCookie(name, value, days = 365) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+}
+
+function generateUserId() {
+    return 'user_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Получаем или создаем ID пользователя
+function getOrCreateUserId() {
+    let userId = getCookie('user_id');
+    if (!userId) {
+        userId = generateUserId();
+        setCookie('user_id', userId);
+    }
+    return userId;
+}
+        
+        // Close capsule when modal is closed
+        function closeCapsule(id) {
+            const capsule = capsulesDB.find(c => c.id === id);
+          
+            if (!capsule) return;
+            
+            // Mark as closed
+            capsule.opened = false;
+            
+            // Update capsule element
+            const capsuleElement = document.querySelector(`.capsule[data-id="${id}"]`);
+            if (capsuleElement) {
+                capsuleElement.classList.remove('capsule-opened');
+                capsuleElement.classList.add('capsule-closed');
+                
+                // Reset timer display
+                const timerElement = document.getElementById(`timer-${id}`);
+                if (timerElement) {
+                    timerElement.style.display = 'block';
+                    timerElement.textContent = formatTimeRemaining(capsule.deliveryDate);
+                }
+                
+                // Reset preview display
+                const previewElement = capsuleElement.querySelector('.capsule-preview');
+                if (previewElement) {
+                    previewElement.style.display = 'block';
+                }
+            }
+        }
+        
+        // Show share modal
+        function showShareModal(id) {
+            const capsule = capsulesDB.find(c => c.id === id);
+            if (!capsule) return;
+            
+            const shareLink = `${window.location.origin}${window.location.pathname}?capsule=${id}`;
+            shareUrl.value = shareLink;
+            shareModal.style.display = 'flex';
+        }
+        
+        // Close letter view
+        closeLetter.addEventListener('click', () => {
+            letterModal.style.display = 'none';
+            const currentCapsuleId = parseInt(letterSeal.textContent.split('#')[1]);
+            console.log(letterSeal);
+            closeCapsule(currentCapsuleId);
+        });
+        
+        // Close share modal
+        closeShare.addEventListener('click', () => {
+            shareModal.style.display = 'none';
+        });
+        
+        // Copy share link
+        copyShareBtn.addEventListener('click', () => {
+            shareUrl.select();
+            document.execCommand('copy');
+            copyShareBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyShareBtn.textContent = 'Copy';
+            }, 2000);
+        });
+        
+        // Twitter share
+        twitterShareBtn.addEventListener('click', () => {
+            const text = `Check out my time capsule ${shareUrl.value.split('=')[1]} on The Time Block`;
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl.value)}`;
+            window.open(url, '_blank');
+        });
+        
+        // Form submission
+     // Form submission
+// Form submission
+document.getElementById('capsule-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const deliveryDate = document.getElementById('delivery-date').value;
+    const message = document.getElementById('message').value;
+    const userId = getOrCreateUserId();
+    
+    try {
+        const response = await fetch('api.php?action=create_capsule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                message: message,
+                delivery_date: deliveryDate,
+                user_id: userId // Добавляем user_id к данным капсулы
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            this.reset();
+     
+            showCapsulesPage();
+            loadCapsules();
+        } else {
+     
+        }
+    } catch (error) {
+        console.error('Error:', error);
+  
+    }
+});
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCapsules();
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+    setupCapsuleClickHandlers();
+    
+    // Обработчик закрытия модального окна
+    closeLetter.addEventListener('click', closeCapsule);
+    
+    // Закрытие по клику вне модального окна
+    letterModal.addEventListener('click', function(e) {
+        if (e.target === letterModal) {
+            closeCapsule();
+        }
+    });
+});
+
+        // Check URL for capsule ID
+        function checkUrlForCapsule() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const capsuleId = urlParams.get('capsule');
+            
+            if (capsuleId) {
+                const id = parseInt(capsuleId);
+                if (!isNaN(id)) {
+                    showCapsulesPage();
+                    setTimeout(() => {
+                        openCapsule(id);
+                    }, 500);
+                }
+            }
+        }
+
+        
+        // Event Listeners
+        mainCta.addEventListener('click', function(e) {
+            e.preventDefault();
+            showFormPage();
+        });
+        
+        viewCapsulesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showCapsulesPage();
+        });
+        
+        createCapsuleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showFormPage();
+        });
+        
+        // Initialize
+        showMainPage();
+        setMinDeliveryDate();
+        checkUrlForCapsule();
+    </script>
+    
+
+</body></html>
